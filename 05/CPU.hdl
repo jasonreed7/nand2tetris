@@ -40,4 +40,33 @@ CHIP CPU {
 
     PARTS:
     // Put your code here:
+            
+        // A register
+        Mux16(a=instruction, b=aluOut, sel=instruction[15], out=aMuxOut);
+        Not(in=instruction[15], out=isACommand);
+        Or(a=isACommand, b=instruction[5], out=isACommandOrDest);
+        ARegister(in=aMuxOut , load=isACommandOrDest , out=aOut, out[0..14]=addressM );
+        
+        // D register
+        And(a=instruction[15] , b=instruction[4] , out=isCCommandWithDestD );
+        DRegister(in=aluOut , load=isCCommandWithDestD , out=dOut );
+
+        // ALU
+        Mux16(a=aOut , b=inM , sel=instruction[12] , out=aOrMMuxOut );
+        ALU(x=dOut , y=aOrMMuxOut , zx=instruction[11] , nx=instruction[10] , zy=instruction[9] , ny=instruction[8] , f=instruction[7] , no=instruction[6] , out=aluOut, out=outM, zr=aluOutEqualsZero , ng=aluOutLtZero );
+
+        // PC
+        And(a=aluOutLtZero , b=instruction[2] , out=ltJump );
+        And(a=aluOutEqualsZero , b=instruction[1] , out=eqJump );
+        Not(in=aluOutLtZero , out=aluOutGeZero );
+        Not(in=aluOutEqualsZero , out=aluOutNeZero );
+        And(a=aluOutGeZero , b=aluOutNeZero , out=aluOutGtZero );
+        And(a=aluOutGtZero , b=instruction[0] , out=gtJump );
+        Or(a=ltJump , b=eqJump , out=ltOrEqJump );
+        Or(a=ltOrEqJump , b=gtJump , out=shouldJump );
+        And(a=instruction[15] , b=shouldJump , out=isCCommandAndShouldJump );
+        PC(in=aOut , load=isCCommandAndShouldJump , inc=true , reset=reset , out[0..14]=pc );
+
+        // writeM: is C command and dest = M
+        And(a=instruction[15] , b=instruction[3], out=writeM);
 }
