@@ -27,7 +27,7 @@ public class Assembler {
         writer = new BufferedWriter(new FileWriter(outputPath));
     }
 
-    public void assemble(String asmFilePath) throws IOException {
+    public void assemble() throws IOException {
         firstPass();
         secondPass();
 

@@ -13,6 +13,6 @@ public class HackAssembler {
         String asmFilePath = args[0];
 
         Assembler assembler = new Assembler(asmFilePath);
-        assembler.assemble(asmFilePath);
+        assembler.assemble();
     }
 }
